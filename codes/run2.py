@@ -22,9 +22,6 @@ from model import KGEModel
 from dataloader import TrainDataset
 from dataloader import BidirectionalOneShotIterator
 
-def zdump(value,filename):
-    with open(filename,"wb",-1) as fpz:
-        fpz.write(zlib.compress(pickle.dumps(value,-1),9))
 
 def parse_args(args=None):
     parser = argparse.ArgumentParser(
@@ -99,18 +96,13 @@ def save_model(model, optimizer, save_variable_list, args, entity2id, relation2i
     torch.save({
         **save_variable_list,
         'model_state_dict': model.state_dict(),
-        'optimizer_state_dict': optimizer.state_dict()},
+        'optimizer_state_dict': optimizer.state_dict(),
+        'entity2id': dict(entity2id),
+        "relation2id": dict(relation2id)},
+
         os.path.join(args.save_path, 'checkpoint')
     )
     
-    entity_embedding = model.entity_embedding.detach().cpu().numpy()
-    relation_embedding = model.relation_embedding.detach().cpu().numpy()
-    zdump({"entity_embedding": entity_embedding,
-           "relation_embedding": relation_embedding,
-           "entity2id":entity2id,
-           "relation2id":relation2id},
-          os.path.join(args.save_path, "embedding.pkl"))
-
 def set_logger(args):
     '''
     Write logs to checkpoint and console
